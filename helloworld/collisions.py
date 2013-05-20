@@ -2,6 +2,7 @@ import pygame, sys
 from pygame.locals import *
 from const import *
 import random
+import time
 
 
 #Constants Definition
@@ -15,12 +16,14 @@ gobbler_left = 0
 gobbler_top = 0
 foodblocks = []
 
+
 def createFoodBlocks():
     '''
     Keeps creating blocks that are meant to be gobbled up. Always maintain a constant level of blocks
     '''
-    global foodblocks, gobbler
+    global foodblocks, gobbler, vector
     foodblocks =[]
+    vector = []
     count_blocks = 0
     while count_blocks < NOOFFOODBLOCKS:
         fb_top = random.randint(0,WINDOWHEIGHT-FOODBLOCKHEIGHT)
@@ -30,16 +33,15 @@ def createFoodBlocks():
             does_not_contain = False
             break   
         for foodblock in foodblocks:
-            if (foodblock.collidepoint(fb_left,fb_top)):
+            if (foodblock[0].collidepoint(fb_left,fb_top)):
                 does_not_contain = False
                 break                            
         if does_not_contain:
-            foodblocks.append(pygame.Rect(fb_top,fb_left,FOODBLOCKWIDTH,FOODBLOCKHEIGHT))
-            pygame.draw.rect(windowSurface,GREEN,foodblocks[count_blocks],0)
+            foodblocks.append([pygame.Rect(fb_top,fb_left,FOODBLOCKWIDTH,FOODBLOCKHEIGHT),random.randint(1,10),random.randint(1,10)])
+            pygame.draw.rect(windowSurface,GREEN,foodblocks[count_blocks][0],0)
             count_blocks +=1
 
-      
-            
+                  
 def createGobbler():
     '''
     Create the gobbler
@@ -74,51 +76,49 @@ def moveGobbler():
             if gobbler.bottom <= WINDOWWIDTH-MOVESPEED:
                 gobbler.top += MOVESPEED
     pygame.draw.rect(windowSurface,RED,gobbler,0)
-    [pygame.draw.rect(windowSurface,GREEN,foodblock,0) for foodblock in foodblocks]
-  
+    [pygame.draw.rect(windowSurface,GREEN,foodblock[0],0) for foodblock in foodblocks]
     gobbleFoodBlocks()
-    moveFoodBlocks()
+    bounceFoodBlocks()
     
 def gobbleFoodBlocks():
     '''
     Gobble Blocks up
     '''
+    global foodblocks, vector
     for foodblock in foodblocks:
-        if foodblock.colliderect(gobbler):
+        if foodblock[0].colliderect(gobbler):
             foodblocks.remove(foodblock)
             break
 
-def moveFoodBlocks():
+
+def bounceFoodBlocks():
     '''
-    Move Food Blocks
+    Bounce Food Blocks
     '''
+    global foodblocks
     windowSurface.fill(BLACK)
     for foodblock in foodblocks:
-        direction_x = random.randint(0,1)
-        direction_y = random.randint(0,1)
-        if direction_x == 0:
-            if foodblock.left >= 2*MOVESPEED:
-                foodblock.left -= 2*MOVESPEED
-        else:
-            if foodblock.right <= WINDOWWIDTH-2*MOVESPEED:
-                foodblock.left += 2*MOVESPEED
-        if direction_y:   
-            if foodblock.top >= 2*MOVESPEED:
-                foodblock.top -= 2*MOVESPEED            
-        else:
-            if foodblock.bottom <= WINDOWWIDTH-2*MOVESPEED:
-                foodblock.top += 2*MOVESPEED
-        pygame.draw.rect(windowSurface,GREEN,foodblock,0)
-    pygame.draw.rect(windowSurface,RED,gobbler,0)      
-        
-                
+        if foodblock[0].left <= 0 or foodblock[0].right >= WINDOWWIDTH:
+            foodblock[1] = -1*foodblock[1]
+        if foodblock[0].top <= 0 or foodblock[0].bottom >= WINDOWHEIGHT:
+            foodblock[2] = -1*foodblock[2]
+        for momoblock in foodblocks:
+            if foodblock[0].colliderect(momoblock[0]):
+                foodblock[1] = -1*foodblock[1]
+                foodblock[2] = -1*foodblock[2]
+                momoblock[1] = -1*momoblock[1]
+                momoblock[2] = -1*momoblock[2]                    
+        foodblock[0].left += foodblock[1]
+        foodblock[0].top += foodblock[2]
+        pygame.draw.rect(windowSurface,GREEN,foodblock[0],0)
+    pygame.draw.rect(windowSurface,RED,gobbler,0)
+
+                  
 #initialize the game
 pygame.init()
 windowSurface = pygame.display.set_mode((WINDOWWIDTH, WINDOWHEIGHT),0,32)
 createGobbler()
-pygame.display.update()
-
-    
+pygame.display.update() 
 while True:
     for event in pygame.event.get():
         if event.type != QUIT:
