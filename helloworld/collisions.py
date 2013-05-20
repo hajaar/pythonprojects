@@ -3,6 +3,7 @@ from pygame.locals import *
 from const import *
 import random
 
+
 #Constants Definition
 NOOFFOODBLOCKS = 15
 FOODBLOCKWIDTH = 20
@@ -25,17 +26,18 @@ def createFoodBlocks():
         fb_top = random.randint(0,WINDOWHEIGHT-FOODBLOCKHEIGHT)
         fb_left = random.randint(0,WINDOWWIDTH-FOODBLOCKWIDTH)
         does_not_contain = True
-        for i in range(len(foodblocks)):
-            if (foodblocks[i].collidepoint(gobbler.left,gobbler.top)):
-                does_not_contain = False
-                break   
-            if (foodblocks[i].collidepoint(fb_left,fb_top)):
+        if (gobbler.collidepoint(fb_left,fb_top)):
+            does_not_contain = False
+            break   
+        for foodblock in foodblocks:
+            if (foodblock.collidepoint(fb_left,fb_top)):
                 does_not_contain = False
                 break                            
         if does_not_contain:
             foodblocks.append(pygame.Rect(fb_top,fb_left,FOODBLOCKWIDTH,FOODBLOCKHEIGHT))
             pygame.draw.rect(windowSurface,GREEN,foodblocks[count_blocks],0)
             count_blocks +=1
+
       
             
 def createGobbler():
@@ -72,11 +74,10 @@ def moveGobbler():
             if gobbler.bottom <= WINDOWWIDTH-MOVESPEED:
                 gobbler.top += MOVESPEED
     pygame.draw.rect(windowSurface,RED,gobbler,0)
-    i=0
-    while i < len(foodblocks):
-        pygame.draw.rect(windowSurface,GREEN,foodblocks[i],0)
-        i += 1    
+    [pygame.draw.rect(windowSurface,GREEN,foodblock,0) for foodblock in foodblocks]
+  
     gobbleFoodBlocks()
+    moveFoodBlocks()
     
 def gobbleFoodBlocks():
     '''
@@ -87,7 +88,30 @@ def gobbleFoodBlocks():
             foodblocks.remove(foodblock)
             break
 
-
+def moveFoodBlocks():
+    '''
+    Move Food Blocks
+    '''
+    windowSurface.fill(BLACK)
+    for foodblock in foodblocks:
+        direction_x = random.randint(0,1)
+        direction_y = random.randint(0,1)
+        if direction_x == 0:
+            if foodblock.left >= 2*MOVESPEED:
+                foodblock.left -= 2*MOVESPEED
+        else:
+            if foodblock.right <= WINDOWWIDTH-2*MOVESPEED:
+                foodblock.left += 2*MOVESPEED
+        if direction_y:   
+            if foodblock.top >= 2*MOVESPEED:
+                foodblock.top -= 2*MOVESPEED            
+        else:
+            if foodblock.bottom <= WINDOWWIDTH-2*MOVESPEED:
+                foodblock.top += 2*MOVESPEED
+        pygame.draw.rect(windowSurface,GREEN,foodblock,0)
+    pygame.draw.rect(windowSurface,RED,gobbler,0)      
+        
+                
 #initialize the game
 pygame.init()
 windowSurface = pygame.display.set_mode((WINDOWWIDTH, WINDOWHEIGHT),0,32)
