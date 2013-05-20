@@ -15,6 +15,9 @@ FOODBLOCKHEIGHT = 20
 gobbler_left = 0    
 gobbler_top = 0
 foodblocks = []
+gobblervelx = 0
+gobblervely = 0
+
 
 
 def createFoodBlocks():
@@ -60,25 +63,33 @@ def moveGobbler():
     '''
     Move the gobbler around. 
     '''
-    global gobbler
+    global gobbler, gobblervelx,gobblervely
     windowSurface.fill(BLACK)
     if event.type == KEYDOWN:
         if event.key == K_LEFT:
-            if gobbler.left >= MOVESPEED:
-                gobbler.left -= MOVESPEED
+            gobblervelx = -MOVESPEED
+            gobblervely = 0
         if event.key == K_RIGHT:
-            if gobbler.right <= WINDOWWIDTH-MOVESPEED:
-                gobbler.left += MOVESPEED
-        if event.key == K_UP:   
-            if gobbler.top >= MOVESPEED:
-                gobbler.top -= MOVESPEED            
+            gobblervelx = MOVESPEED
+            gobblervely = 0
+        if event.key == K_UP:
+            gobblervelx = 0
+            gobblervely = -MOVESPEED
         if event.key == K_DOWN:
-            if gobbler.bottom <= WINDOWWIDTH-MOVESPEED:
-                gobbler.top += MOVESPEED
+            gobblervelx = 0
+            gobblervely = MOVESPEED                        
+    if gobbler.left > 0 :
+        gobbler.left += gobblervelx
+    if gobbler.right < WINDOWWIDTH:
+        gobbler.left += gobblervelx
+    if gobbler.top >= 0 :
+        gobbler.top += gobblervely
+    if gobbler.bottom <= WINDOWHEIGHT:
+        gobbler.top += gobblervely
     pygame.draw.rect(windowSurface,RED,gobbler,0)
     [pygame.draw.rect(windowSurface,GREEN,foodblock[0],0) for foodblock in foodblocks]
     gobbleFoodBlocks()
-    bounceFoodBlocks()
+
     
 def gobbleFoodBlocks():
     '''
@@ -98,16 +109,16 @@ def bounceFoodBlocks():
     global foodblocks
     windowSurface.fill(BLACK)
     for foodblock in foodblocks:
-        if foodblock[0].left <= 0 or foodblock[0].right >= WINDOWWIDTH:
-            foodblock[1] = -1*foodblock[1]
-        if foodblock[0].top <= 0 or foodblock[0].bottom >= WINDOWHEIGHT:
-            foodblock[2] = -1*foodblock[2]
         for momoblock in foodblocks:
             if foodblock[0].colliderect(momoblock[0]):
                 foodblock[1] = -1*foodblock[1]
                 foodblock[2] = -1*foodblock[2]
                 momoblock[1] = -1*momoblock[1]
-                momoblock[2] = -1*momoblock[2]                    
+                momoblock[2] = -1*momoblock[2]          
+        if foodblock[0].left <= 0 or foodblock[0].right >= WINDOWWIDTH:
+            foodblock[1] = -1*foodblock[1]
+        if foodblock[0].top <= 0 or foodblock[0].bottom >= WINDOWHEIGHT:
+            foodblock[2] = -1*foodblock[2]                  
         foodblock[0].left += foodblock[1]
         foodblock[0].top += foodblock[2]
         pygame.draw.rect(windowSurface,GREEN,foodblock[0],0)
@@ -118,10 +129,14 @@ def bounceFoodBlocks():
 pygame.init()
 windowSurface = pygame.display.set_mode((WINDOWWIDTH, WINDOWHEIGHT),0,32)
 createGobbler()
+pygame.time.set_timer(USEREVENT+1,100)
 pygame.display.update() 
 while True:
     for event in pygame.event.get():
         if event.type != QUIT:
+            if event.type == USEREVENT + 1:
+                bounceFoodBlocks()
+                moveGobbler()
             moveGobbler()
             pygame.display.update()
         else:
