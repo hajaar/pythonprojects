@@ -9,16 +9,11 @@ import time
 NOOFFOODBLOCKS = 15
 FOODBLOCKWIDTH = 20
 FOODBLOCKHEIGHT = 20
-
-
 #Globals definition
 gobbler_left = 0    
 gobbler_top = 0
 foodblocks = []
-gobblervelx = 0
-gobblervely = 0
-
-
+direction = 'RIGHT'
 
 def createFoodBlocks():
     '''
@@ -43,6 +38,7 @@ def createFoodBlocks():
             foodblocks.append([pygame.Rect(fb_top,fb_left,FOODBLOCKWIDTH,FOODBLOCKHEIGHT),random.randint(1,10),random.randint(1,10)])
             pygame.draw.rect(windowSurface,GREEN,foodblocks[count_blocks][0],0)
             count_blocks +=1
+    print count_blocks
 
                   
 def createGobbler():
@@ -56,37 +52,44 @@ def createGobbler():
     gobbler_width = 40
     gobbler_height = 40
     gobbler =pygame.Rect(gobbler_left,gobbler_top,gobbler_width,gobbler_height)
-    pygame.draw.rect(windowSurface,RED,gobbler,0)    
+    windowSurface.blit(myImageSurface,(gobbler.left,gobbler.top))    
     createFoodBlocks()
     
 def moveGobbler():
     '''
     Move the gobbler around. 
     '''
-    global gobbler, gobblervelx,gobblervely
-    windowSurface.fill(BLACK)
+    global gobbler, direction
+    windowSurface.fill(WHITE)
     if event.type == KEYDOWN:
         if event.key == K_LEFT:
-            gobblervelx = -MOVESPEED
-            gobblervely = 0
+            direction = 'LEFT'
         if event.key == K_RIGHT:
-            gobblervelx = MOVESPEED
-            gobblervely = 0
+            direction = 'RIGHT'
         if event.key == K_UP:
-            gobblervelx = 0
-            gobblervely = -MOVESPEED
+            direction = 'UP'          
         if event.key == K_DOWN:
-            gobblervelx = 0
-            gobblervely = MOVESPEED                        
-    if gobbler.left > 0 :
-        gobbler.left += gobblervelx
-    if gobbler.right < WINDOWWIDTH:
-        gobbler.left += gobblervelx
-    if gobbler.top >= 0 :
-        gobbler.top += gobblervely
-    if gobbler.bottom <= WINDOWHEIGHT:
-        gobbler.top += gobblervely
-    pygame.draw.rect(windowSurface,RED,gobbler,0)
+            direction = 'DOWN'                     
+    if direction == 'LEFT':
+        gobbler.left += -MOVESPEED
+        windowSurface.blit(leftImageSurface,(gobbler.left,gobbler.top))
+    elif direction == 'RIGHT':
+        gobbler.left += MOVESPEED
+        windowSurface.blit(myImageSurface,(gobbler.left,gobbler.top))        
+    elif direction == 'UP':
+        gobbler.top += -MOVESPEED
+        windowSurface.blit(upImageSurface,(gobbler.left,gobbler.top))
+    elif direction == 'DOWN':
+        gobbler.top += +MOVESPEED
+        windowSurface.blit(downImageSurface,(gobbler.left,gobbler.top)) 
+    if gobbler.left < 0:
+        gobbler.right = WINDOWWIDTH    
+    if gobbler.right > WINDOWWIDTH:
+        gobbler.left = 0
+    if gobbler.top < 0:
+        gobbler.bottom = WINDOWHEIGHT
+    if gobbler.bottom > WINDOWHEIGHT:
+        gobbler.top = 0    
     [pygame.draw.rect(windowSurface,GREEN,foodblock[0],0) for foodblock in foodblocks]
     gobbleFoodBlocks()
 
@@ -107,7 +110,7 @@ def bounceFoodBlocks():
     Bounce Food Blocks
     '''
     global foodblocks
-    windowSurface.fill(BLACK)
+    windowSurface.fill(WHITE)
     for foodblock in foodblocks:
         for momoblock in foodblocks:
             if foodblock[0].colliderect(momoblock[0]):
@@ -122,12 +125,16 @@ def bounceFoodBlocks():
         foodblock[0].left += foodblock[1]
         foodblock[0].top += foodblock[2]
         pygame.draw.rect(windowSurface,GREEN,foodblock[0],0)
-    pygame.draw.rect(windowSurface,RED,gobbler,0)
+    pygame.draw.rect(windowSurface,WHITE,gobbler,0)
 
                   
 #initialize the game
 pygame.init()
 windowSurface = pygame.display.set_mode((WINDOWWIDTH, WINDOWHEIGHT),0,32)
+myImageSurface = pygame.image.load('/home/hajaar/Downloads/pacman.png').convert_alpha()
+leftImageSurface = pygame.transform.flip(myImageSurface,True,False)
+upImageSurface = pygame.transform.rotate(myImageSurface,90)
+downImageSurface = pygame.transform.rotate(myImageSurface,270)
 createGobbler()
 pygame.time.set_timer(USEREVENT+1,100)
 pygame.display.update() 
