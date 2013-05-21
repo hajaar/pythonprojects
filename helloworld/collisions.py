@@ -35,8 +35,8 @@ def createFoodBlocks():
                 does_not_contain = False
                 break                            
         if does_not_contain:
-            foodblocks.append([pygame.Rect(fb_top,fb_left,FOODBLOCKWIDTH,FOODBLOCKHEIGHT),random.randint(1,10),random.randint(1,10)])
-            pygame.draw.rect(windowSurface,GREEN,foodblocks[count_blocks][0],0)
+            foodblocks.append([pygame.Rect(fb_left,fb_top,FOODBLOCKWIDTH,FOODBLOCKHEIGHT),random.randint(1,10),random.randint(1,10)])
+            windowSurface.blit(blinkySurface,(fb_left,fb_top))
             count_blocks +=1
     print count_blocks
 
@@ -54,6 +54,7 @@ def createGobbler():
     gobbler =pygame.Rect(gobbler_left,gobbler_top,gobbler_width,gobbler_height)
     windowSurface.blit(myImageSurface,(gobbler.left,gobbler.top))    
     createFoodBlocks()
+
     
 def moveGobbler():
     '''
@@ -90,7 +91,7 @@ def moveGobbler():
         gobbler.bottom = WINDOWHEIGHT
     if gobbler.bottom > WINDOWHEIGHT:
         gobbler.top = 0    
-    [pygame.draw.rect(windowSurface,GREEN,foodblock[0],0) for foodblock in foodblocks]
+    [windowSurface.blit(blinkySurface,(foodblock[0].left,foodblock[0].top)) for foodblock in foodblocks]
     gobbleFoodBlocks()
 
     
@@ -124,17 +125,22 @@ def bounceFoodBlocks():
             foodblock[2] = -1*foodblock[2]                  
         foodblock[0].left += foodblock[1]
         foodblock[0].top += foodblock[2]
-        pygame.draw.rect(windowSurface,GREEN,foodblock[0],0)
-    pygame.draw.rect(windowSurface,WHITE,gobbler,0)
+        windowSurface.blit(blinkySurface,(foodblock[0].left,foodblock[0].top))
+#    pygame.draw.rect(windowSurface,WHITE,gobbler,0)
 
                   
 #initialize the game
+
+
 pygame.init()
 windowSurface = pygame.display.set_mode((WINDOWWIDTH, WINDOWHEIGHT),0,32)
 myImageSurface = pygame.image.load('/home/hajaar/Downloads/pacman.png').convert_alpha()
+myImageSurface = pygame.transform.scale(myImageSurface,(40,40))
 leftImageSurface = pygame.transform.flip(myImageSurface,True,False)
 upImageSurface = pygame.transform.rotate(myImageSurface,90)
 downImageSurface = pygame.transform.rotate(myImageSurface,270)
+blinkySurface = pygame.image.load('/home/hajaar/Downloads/blinky.png').convert_alpha()
+blinkySurface = pygame.transform.scale(blinkySurface,(20,20))
 createGobbler()
 pygame.time.set_timer(USEREVENT+1,100)
 pygame.display.update() 
