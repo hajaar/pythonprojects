@@ -10,8 +10,6 @@ NOOFFOODBLOCKS = 15
 FOODBLOCKWIDTH = 20
 FOODBLOCKHEIGHT = 20
 #Globals definition
-gobbler_left = 0    
-gobbler_top = 0
 foodblocks = []
 direction = 'RIGHT'
 
@@ -45,15 +43,15 @@ def createGobbler():
     '''
     Create the gobbler
     '''
-    global gobbler_left, gobbler_top
     global gobbler
-    gobbler_left = WINDOWWIDTH//2
-    gobbler_top = WINDOWHEIGHT//2
     gobbler_width = 40
     gobbler_height = 40
+    gobbler_left = random.randint(gobbler_width, WINDOWWIDTH - gobbler_width)
+    gobbler_top = random.randint(gobbler_height, WINDOWHEIGHT - gobbler_height)
     gobbler =pygame.Rect(gobbler_left,gobbler_top,gobbler_width,gobbler_height)
     windowSurface.blit(myImageSurface,(gobbler.left,gobbler.top))    
     createFoodBlocks()
+    createWalls()
 
     
 def moveGobbler():
@@ -90,7 +88,7 @@ def moveGobbler():
     if gobbler.top < 0:
         gobbler.bottom = WINDOWHEIGHT
     if gobbler.bottom > WINDOWHEIGHT:
-        gobbler.top = 0    
+        gobbler.top = 0             
     [windowSurface.blit(blinkySurface,(foodblock[0].left,foodblock[0].top)) for foodblock in foodblocks]
     gobbleFoodBlocks()
 
@@ -122,12 +120,29 @@ def bounceFoodBlocks():
         if foodblock[0].left <= 0 or foodblock[0].right >= WINDOWWIDTH:
             foodblock[1] = -1*foodblock[1]
         if foodblock[0].top <= 0 or foodblock[0].bottom >= WINDOWHEIGHT:
-            foodblock[2] = -1*foodblock[2]                  
+            foodblock[2] = -1*foodblock[2]
+        for wall in walls:                      
+            if foodblock[0].colliderect(wall):
+                foodblock[1] = -1 * foodblock[1]
+                foodblock[2] = -1 * foodblock[2]
         foodblock[0].left += foodblock[1]
         foodblock[0].top += foodblock[2]
         windowSurface.blit(blinkySurface,(foodblock[0].left,foodblock[0].top))
 
-                  
+   
+def createWalls():
+    '''
+    Creates walls which constrains movement
+    '''
+    global walls
+    walls = []    
+    walls.append(Rect(WINDOWWIDTH//2,0,1,WINDOWHEIGHT//4))
+    walls.append(Rect(WINDOWWIDTH//2,3*WINDOWHEIGHT//4,1,WINDOWHEIGHT//4))
+    walls.append(Rect(WINDOWWIDTH//3,100,WINDOWWIDTH//3,10))
+    for wall in walls:
+        pygame.draw.rect(windowSurface, BLACK,wall)
+    
+                      
 #initialize the game
 pygame.init()
 fpsClock = pygame.time.Clock()
@@ -149,6 +164,7 @@ while True:
                 bounceFoodBlocks()
                 moveGobbler()
             moveGobbler()
+            createWalls()
         else:
             pygame.quit()
             sys.exit()
