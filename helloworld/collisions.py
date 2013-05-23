@@ -17,7 +17,7 @@ direction = 'RIGHT'
 
 def createFoodBlocks():
     '''
-    Keeps creating blocks that are meant to be gobbled up. Always maintain a constant level of blocks
+    Keeps creating blocks that are meant to be gobbled up. 
     '''
     global foodblocks, gobbler, vector
     foodblocks =[]
@@ -126,21 +126,19 @@ def bounceFoodBlocks():
         foodblock[0].left += foodblock[1]
         foodblock[0].top += foodblock[2]
         windowSurface.blit(blinkySurface,(foodblock[0].left,foodblock[0].top))
-#    pygame.draw.rect(windowSurface,WHITE,gobbler,0)
 
                   
 #initialize the game
-
-
 pygame.init()
+fpsClock = pygame.time.Clock()
 windowSurface = pygame.display.set_mode((WINDOWWIDTH, WINDOWHEIGHT),0,32)
 myImageSurface = pygame.image.load('/home/hajaar/Downloads/pacman.png').convert_alpha()
-myImageSurface = pygame.transform.scale(myImageSurface,(40,40))
+myImageSurface = pygame.transform.scale(myImageSurface,(44,44))
 leftImageSurface = pygame.transform.flip(myImageSurface,True,False)
 upImageSurface = pygame.transform.rotate(myImageSurface,90)
 downImageSurface = pygame.transform.rotate(myImageSurface,270)
 blinkySurface = pygame.image.load('/home/hajaar/Downloads/blinky.png').convert_alpha()
-blinkySurface = pygame.transform.scale(blinkySurface,(20,20))
+blinkySurface = pygame.transform.scale(blinkySurface,(22,22))
 createGobbler()
 pygame.time.set_timer(USEREVENT+1,100)
 pygame.display.update() 
@@ -151,9 +149,10 @@ while True:
                 bounceFoodBlocks()
                 moveGobbler()
             moveGobbler()
-            pygame.display.update()
         else:
             pygame.quit()
             sys.exit()
+        pygame.display.update()
+        fpsClock.tick(FPS)
              
         
